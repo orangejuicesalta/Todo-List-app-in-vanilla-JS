@@ -1,89 +1,87 @@
-'use strict';
-
-
-//functions we need: add, remove, complete, uncomplete, update, getthe history of complete
-
-
-//Date generator
-function date() {
-  let now = new Date(Date.now()).toLocaleString();
-  return now;
-}
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//Item function constructor
-function Item(desc) {
-  this.completeHistory = []
-  this.id = Math.floor(Math.random() * 1e5);
-  this.description = desc;
-  this.createdAt = date();
-  this.completedAt = null;
-  this.completeHistory = [];
-}
-
-
-//Todolist constructor function/////////////////////////////////////////////////////////////////////////////////
-function ToDoList() {
- 
- this.items = [];
-//unique id generator function
-  this.findIndexById = function(id) {
-    for (let i = 0; i < this.items.length; i++) {
-      for (let prop in this.items[i]) {
-        if (this.items[i][prop] === id) {
-          return i;
-        }
-      }
-    }
+class ToDoList {
+  constructor(title) {
+    this.items = [];
+    this.title = '';
   }
-  
-  //adds new item
-  this.add = function (desc) {
-    let item = new Item(desc);
-    if(this.items.find(obj => obj.id === item.id)) return this.add(desc);
+
+  add(text) {
+    let item = new Item(text);
+    if (this.items.find(obj => obj.id === item.id)) return this.add(text);
     this.items.push(item);
-    return this.items;
-  };
+    return item;
+  }
 
-  //complete the task
-  this.complete = function (id) {
-    let timeAndDate = date();
-    this.items[this.findIndexById(id)]['completedAt'] = timeAndDate;
-    this.items[this.findIndexById(id)]['completeHistory'].push(timeAndDate);
-    return this.items;
-  };
+  complete(id) {
+    let task = this.findIndexById(id);
+    return task.complete();
+  }
 
-  //uncomplete the task
-  this.uncomplete = function (id) {
-    this.items[this.findIndexById(id)]['completedAt'] = null;
-    return this.items;
-  };
+  uncomplete(id) {
+    let task = this.findIndexById(id);
+    return task.uncomplete();
+  }
 
-  //remove the task from this.items
-  this.remove = function (id) {
-    this.items.splice(this.findIndexById(id), 1);
-    return this.items;
-  };
+  remove(id) {
+    let task = this.findIndexById(id);
+    let index = this.items.indexOf(task);
+    return this.items.splice(index, 1)[0];
+  }
 
-  //update the desc of the task
-  this.update = function (id, newDesc) {
-    this.items[this.findIndexById(id)]['description'] = newDesc;
-    return this.items;
-  };
+  getCompHistory(id) {
+    let task = this.findIndexById(id);
+    return task.getCompHistory();
+  }
 
-  //get the completion history of the task by id
-  this.getCompHistory = function(id) {
-    for(let element of this.items[this.findIndexById(id)]['completeHistory']) {
-      console.log(`${element}`);
-    }
-    return this.items;
+  findIndexById(id) {
+    let foundTask = this.items.filter(task => task.id === id);
+    return foundTask[0];
+  }
+
+  update(id, newText) {
+    let task = this.findIndexById(id);
+    return task.update();
   }
 }
 
-///////////////////////////////////////////////////////
+
+
+class Item {
+  constructor(text) {
+    this.completionHistory = [];
+    this.id = Math.floor(Math.random() * 1e5);
+    this.description = text;
+    this.createdAt = Date.now();
+    this.completedAt = null;
+    this.completeHistory = [];
+  }
+
+  complete() {
+    let now = Date.now();
+    this.completedAt = now;
+    this.completionHistory.push(now);
+
+    return this;
+  }
+
+  umcomplete() {
+    this.completedAt = null;
+    return this;
+  }
+
+  getCompHistory() {
+    return this.completionHistory;
+  }
+
+  update(newText) {
+    this.description = newText;
+    return this;
+  }
+}
+
+
 // Let's try
-let todolist = new ToDoList();
-todolist.add('Create a study plan');
-
-
+let todolist = new ToDoList('Internship tasks');
+todolist.add('clean the code');
+let task = todolist.add('finish the task 1');
+task.complete();
+console.log(todolist.items);
